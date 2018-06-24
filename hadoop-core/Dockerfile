@@ -5,17 +5,22 @@ LABEL "author"="Himanshu Shekhar <himanshu.shekhar.in@gmail.com>"
 ARG DEBIAN_FRONTEND=noninteractive
 ARG HADOOP_VERSION=2.7.6
 ARG SPARK_VERSION=2.3.0
+ARG SQOOP_VERSION=1.4.7
 ARG UNAME=padmin
 ARG UNAME=padmin
 
 ENV INSTALL_DIR=/opt/ \
     HADOOP_HOME=/opt/hadoop-2.7.6 \
     HADOOP_APPDATA=/opt/data/apps \
-    SPARK_HOME=/opt/spark-2.3.0
+    SPARK_HOME=/opt/spark-2.3.0 \
+    SQOOP_HOME=/opt/sqoop-1.4.7
 
 #COPY http://www.apache.org/dyn/closer.cgi/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz /tmp/
 COPY hadoop-${HADOOP_VERSION}.tar.gz /tmp/
 COPY spark-${SPARK_VERSION}-bin-hadoop2.7.tgz /tmp/
+COPY sqoop-${SQOOP_VERSION}.bin__hadoop-2.6.0.tar.gz /tmp/
+COPY ojdbc6.jar /tmp/
+COPY mysql-connector-java-5.1.45-bin.jar /tmp/
 
 ADD conf /tmp/conf
 
@@ -28,12 +33,18 @@ RUN sudo apt-get update && \
     sudo mv ${INSTALL_DIR}/spark-${SPARK_VERSION}-bin-hadoop2.7 ${INSTALL_DIR}/spark-${SPARK_VERSION} && \
     sudo rm -rf /tmp/spark-${SPARK_VERSION}-* && \
     sudo cp /tmp/conf/spark/* ${SPARK_HOME}/conf/ && \
+    sudo tar -xvf /tmp/sqoop-${SQOOP_VERSION}.bin__hadoop-2.6.0.tar.gz -C ${INSTALL_DIR} && \
+    sudo mv ${INSTALL_DIR}/sqoop-${SQOOP_VERSION}.bin__hadoop-2.6.0 ${INSTALL_DIR}/sqoop-${SQOOP_VERSION} && \
+    sudo rm -rf /tmp/sqoop-${SQOOP_VERSION}.bin__hadoop-2.6.0.tar.gz && \
+    sudo mv /tmp/ojdbc6.jar ${SQOOP_HOME}/lib/ && \
+    sudo mv /tmp/mysql-connector-java-5.1.45-bin.jar ${SQOOP_HOME}/lib/ && \
     sudo chown -R ${UNAME}:${GNAME} ${INSTALL_DIR} && \
     echo "export HADOOP_HOME=${HADOOP_HOME}" >> ~/.bashrc && \
     echo "export HADOOP_CONF_DIR=${HADOOP_HOME}/etc/hadoop" >> ~/.bashrc && \
     echo "export LD_LIBRARY_PATH=${HADOOP_HOME}/lib/native:${LD_LIBRARY_PATH}" >> ~/.bashrc && \
     echo "export SPARK_HOME=${SPARK_HOME}" >> ~/.bashrc && \
-    echo "export PATH=${PATH}:${HADOOP_HOME}/bin:${SPARK_HOME}/bin" >> ~/.bashrc
+    echo "export SQOOP_HOME=${SQOOP_HOME}" >> ~/.bashrc && \
+    echo "export PATH=${PATH}:${HADOOP_HOME}/bin:${SPARK_HOME}/bin:${SQOOP_HOME}/bin" >> ~/.bashrc
 
 # Spark ports
 EXPOSE 7077 6066 8080 8081

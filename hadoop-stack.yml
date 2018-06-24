@@ -15,6 +15,7 @@ services:
     links:
       - hdfs-datanode01
       - hdfs-datanode02
+      - db-mysql
 
   hdfs-datanode01:
     image: hshekhar47/hdfs-datanode:0.1
@@ -29,3 +30,15 @@ services:
     stdin_open: true
     environment:
       - HADOOP_NAMENODE_HOSTNAME=hdfs-namenode
+
+  db-mysql:
+    image: mysql:5.7
+    hostname: db-mysql
+    stdin_open: true
+    environment:
+      - MYSQL_ROOT_PASSWORD=s3kr3t
+      - MYSQL_USER=dbadmin
+      - MYSQL_PASSWORD=dbadmin
+      - MYSQL_DATABASE=sample
+    ports:
+      - "3306:3306"

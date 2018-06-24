@@ -57,6 +57,12 @@ if [ $? -ne 0 ]; then
     export PATH
 fi
 
+echo $PATH | grep -q "${SQOOP_HOME}"
+if [ $? -ne 0 ]; then
+    PATH=${PATH}:${SQOOP_HOME}/bin
+    export PATH
+fi
+
 log "INFO" "Starting the SSH daemon..."
 sudo service ssh restart || { log "ERROR" "Could not start ssh service."; exit 1;}
 log "SUCCESS" "Started SSH daemon successfully."
