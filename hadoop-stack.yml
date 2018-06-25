@@ -12,6 +12,7 @@ services:
       - "8088:8088"
       - "18080:18080"
       - "50070:50070"
+      - "10000:10000"
     links:
       - hdfs-datanode01
       - hdfs-datanode02

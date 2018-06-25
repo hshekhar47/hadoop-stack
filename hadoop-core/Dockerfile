@@ -7,7 +7,7 @@ ARG HADOOP_VERSION=2.7.6
 ARG SPARK_VERSION=2.3.0
 ARG SQOOP_VERSION=1.4.7
 ARG UNAME=padmin
-ARG UNAME=padmin
+ARG GNAME=hadoop
 
 ENV INSTALL_DIR=/opt/ \
     HADOOP_HOME=/opt/hadoop-2.7.6 \
@@ -44,7 +44,8 @@ RUN sudo apt-get update && \
     echo "export LD_LIBRARY_PATH=${HADOOP_HOME}/lib/native:${LD_LIBRARY_PATH}" >> ~/.bashrc && \
     echo "export SPARK_HOME=${SPARK_HOME}" >> ~/.bashrc && \
     echo "export SQOOP_HOME=${SQOOP_HOME}" >> ~/.bashrc && \
-    echo "export PATH=${PATH}:${HADOOP_HOME}/bin:${SPARK_HOME}/bin:${SQOOP_HOME}/bin" >> ~/.bashrc
+    export PATH=${PATH}:${HADOOP_HOME}/bin:${SPARK_HOME}/bin:${SQOOP_HOME}/bin
+
 
 # Spark ports
 EXPOSE 7077 6066 8080 8081

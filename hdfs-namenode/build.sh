@@ -4,6 +4,24 @@ VERSION=0.1
 
 BUILD_DIR=$(dirname "${BASH_SOURCE[0]}")
 
+BUILD_RESOURCES=("apache-hive-2.3.3-bin.tar.gz") 
+
+pre_build() {
+    RESOURCES_DIR=$(dirname "${BUILD_DIR}")/resources
+
+    for resource in ${BUILD_RESOURCES[@]}; do
+        if [ ! -f "${BUILD_DIR}/${resource}" ];then 
+            cp ${RESOURCES_DIR}/${resource} ${BUILD_DIR}
+        fi
+    done 
+}
+
+post_build() {
+    for resource in ${BUILD_RESOURCES[@]}; do
+        rm -rf ${BUILD_DIR}/${resource}
+    done 
+}
+
 clean() {
     echo "Cleaning ${NAME}:${VERSION}";
     docker image rm ${NAME}:${VERSION}
@@ -16,17 +34,24 @@ clean() {
 }
 
 build() {
-    clean
-    docker build -t ${NAME}:${VERSION} ${BUILD_DIR} && { echo "[BUILD]: ${NAME}:${VERSION} created successfully."; return 0;}
-    return 1;
+    pre_build
+    docker build -t ${NAME}:${VERSION} ${BUILD_DIR}
+    if [ "$?" == "0" ];then
+        echo "[INFO ]: ${NAME}:${VERSION} created successfully." 
+        post_build
+        return 0;
+    fi
+    return 1
 }
 
 
 case "$1" in
     "clean") 
         clean;;
-    *) 
+    "build")
         build;;
+    *) 
+        clean; build;;
 esac
 
 exit $?;

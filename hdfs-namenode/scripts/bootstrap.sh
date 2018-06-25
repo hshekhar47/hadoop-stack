@@ -47,21 +47,26 @@ check_node_alive() {
 
 echo $PATH | grep -q "${HADOOP_HOME}"
 if [ $? -ne 0 ]; then
-    PATH=${PATH}:${HADOOP_HOME}/bin
-    export PATH
+    export PATH=${PATH}:${HADOOP_HOME}/bin
 fi
 
 echo $PATH | grep -q "${SPARK_HOME}"
 if [ $? -ne 0 ]; then
-    PATH=${PATH}:${SPARK_HOME}/bin
-    export PATH
+    export PATH=${PATH}:${SPARK_HOME}/bin
+
 fi
 
 echo $PATH | grep -q "${SQOOP_HOME}"
 if [ $? -ne 0 ]; then
-    PATH=${PATH}:${SQOOP_HOME}/bin
-    export PATH
+    export PATH=${PATH}:${SQOOP_HOME}/bin
 fi
+
+echo $PATH | grep -q "${HIVE_HOME}"
+if [ $? -ne 0 ]; then
+    export PATH=${PATH}:${HIVE_HOME}/bin
+fi
+
+echo "export PATH=${PATH}" >> ~/.bashrc
 
 log "INFO" "Starting the SSH daemon..."
 sudo service ssh restart || { log "ERROR" "Could not start ssh service."; exit 1;}
@@ -99,12 +104,16 @@ log "SUCCESS" "HDFS Started successfully."
 
 log "INFO" "Creating filesystems"
 hdfs dfs -mkdir -p /tmp
+hdfs dfs -mkdir -p /tmp/hive
 hdfs dfs -chmod -R 777 /tmp
 if [ $? -eq 0 ];then log "SUCCESS" "Created /tmp"; fi;
 hdfs dfs -mkdir /spark-logs
 if [ $? -eq 0 ];then log "SUCCESS" "Created /spark-logs"; fi;
 hdfs dfs -mkdir -p /user/padmin 
 if [ $? -eq 0 ]; then log "SUCCESS" "Created /user/padmin"; fi; 
+hdfs dfs -mkdir -p /user/hive/warehouse
+hdfs dfs -chmod -R 777 /user/hive/warehouse
+if [ $? -eq 0 ]; then log "SUCCESS" "Created /user/hive/warehouse"; fi;
 
 log "INFO" "Spark jars distributions"
 
@@ -114,6 +123,15 @@ log "SUCCESS" "YARN Started successfully."
 
 log "INFO" "Staring spark history-server"
 ${SPARK_HOME}/sbin/start-history-server.sh
+
+log "INFO" "Starting HoveServer"
+cd ${HIVE_HOME}	
+schematool -dbType derby -initSchema	
+hive --service hiveserver2 &
+cd -
+log "INFO" "+-----------------------------------------------+"
+log "INFO" "| > beeline -u jdbc:hive2://hdfs-namenode:10000 |"
+log "INFO" "+-----------------------------------------------+"
 
 log "SUCCESS" "All services on NameNode ${HOSTNAME} started successfully."
 hdfs dfsadmin -report

@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <property>
+        <name>hive.server2.enable.doAs</name>
+        <value>false</value> 
+    </property>
+    <property>
+        <name>hive.server2.authentication</name>
+        <value>NONE</value>
+        <description>
+        Expects one of [nosasl, none, ldap, kerberos, pam, custom].
+        Client authentication types.
+            NONE: no authentication check
+            LDAP: LDAP/AD based authentication
+            KERBEROS: Kerberos/GSSAPI authentication
+            CUSTOM: Custom authentication provider
+                    (Use with property hive.server2.custom.authentication.class)
+            PAM: Pluggable authentication module
+            NOSASL:  Raw transport
+        </description>
+    </property>
+</configuration>

@@ -2,9 +2,22 @@ FROM hshekhar47/hadoop-core:0.1
 
 LABEL "author"="Himanshu Shekhar <himanshu.shekhar.in@gmail.com>"
 
-ADD scripts/ /usr/bin/
+ARG HIVE_VERSION=2.3.3
+
+ENV INSTALL_DIR=/opt \
+    HIVE_HOME=/opt/hive-2.3.3
+
+COPY apache-hive-${HIVE_VERSION}-bin.tar.gz /tmp
+ADD conf /tmp
+ADD scripts/ /usr/bin/ 
 
 RUN sudo apt-get update && \
+    tar -xvf /tmp/apache-hive-${HIVE_VERSION}-bin.tar.gz -C ${INSTALL_DIR} && \
+    mv ${INSTALL_DIR}/apache-hive-${HIVE_VERSION}-bin ${INSTALL_DIR}/hive-${HIVE_VERSION} && \
+    rm -rf ${INSTALL_DIR}/hive-${HIVE_VERSION}/lib/log4j-slf4j-impl-*.jar && \
+    cp /tmp/hive/* ${HIVE_HOME}/conf && \
+    echo "export HIVE_HOME=${HIVE_HOME}" >> ~/.bashrc && \
+    export PATH=${PATH}:${HIVE_HOME}/bin && \
     sudo chmod +x /usr/bin/bootstrap.sh 
 
 ENTRYPOINT ["/bin/bash", "-c"]

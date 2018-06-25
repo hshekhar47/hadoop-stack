@@ -43,6 +43,8 @@ if [ $? -ne 0 ]; then
     export PATH
 fi
 
+echo "export PATH=${PATH}" >> ~/.bashrc
+
 log "INFO" "Starting the SSH daemon..."
 sudo service ssh restart || { log "ERROR" "Could not start ssh service."; exit 1;}
 log "SUCCESS" "Started SSH daemon successfully."
