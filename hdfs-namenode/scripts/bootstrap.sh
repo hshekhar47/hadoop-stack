@@ -76,6 +76,8 @@ export HOSTNAME=`hostname`
 sed -i "s#localhost#$HOSTNAME#g" ${HADOOP_HOME}/etc/hadoop/core-site.xml
 sed -i "s#localhost#$HOSTNAME#g" ${HADOOP_HOME}/etc/hadoop/yarn-site.xml
 sed -i "s#localhost#$HOSTNAME#g" ${SPARK_HOME}/conf/spark-defaults.conf
+sed -i "s#localhost#$HOSTNAME#g" ${HIVE_HOME}/conf/hive-site-derby.xml 
+sed -i "s#localhost#$HOSTNAME#g" ${HIVE_HOME}/conf/hive-site-mysql.xml 
 
 log "INFO" "Formatting NameNode data directory..."
 hdfs namenode -format -force || { log "ERROR" "Could not format namenode data directory."; exit 1;}
@@ -124,14 +126,23 @@ log "SUCCESS" "YARN Started successfully."
 log "INFO" "Staring spark history-server"
 ${SPARK_HOME}/sbin/start-history-server.sh
 
-log "INFO" "Starting HoveServer"
+log "INFO" "Starting HiveServer"
 cd ${HIVE_HOME}	
-schematool -dbType derby -initSchema	
+schema_type=${HIVE_SCHEMA_TYPE:-"derby"}	
+case "${schema_type}" in
+    "derby")
+        mv ${HIVE_HOME}/conf/hive-site-derby.xml ${HIVE_HOME}/conf/hive-site.xml
+        ;;
+    "mysql")
+        mv ${HIVE_HOME}/conf/hive-site-mysql.xml ${HIVE_HOME}/conf/hive-site.xml
+        ;;
+esac
+schematool -dbType ${schema_type} -initSchema
 hive --service hiveserver2 &
 cd -
-log "INFO" "+-----------------------------------------------+"
-log "INFO" "| > beeline -u jdbc:hive2://hdfs-namenode:10000 |"
-log "INFO" "+-----------------------------------------------+"
+log "INFO" "+------------------------------------------------------+"
+log "INFO" "| derby -> beeline -u jdbc:hive2://hdfs-namenode:10000 |"
+log "INFO" "+------------------------------------------------------+"
 
 log "SUCCESS" "All services on NameNode ${HOSTNAME} started successfully."
 hdfs dfsadmin -report

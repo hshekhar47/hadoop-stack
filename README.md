@@ -28,7 +28,7 @@ Once done build each image
 ```
 
 #### [hshekhar47/hdfs-namenode](./hdfs-namenode/README.md) 
-`hshekhar47/hadoop-core`
+: `hshekhar47/hadoop-core`
 ##### Build 
 ```bash
 ./build.sh build hdfs-namenode

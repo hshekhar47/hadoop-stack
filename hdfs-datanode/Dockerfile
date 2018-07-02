@@ -1,6 +1,6 @@
 FROM hshekhar47/hadoop-core:0.1
 
-LABEL "author"="Himanshu Shekhar <himanshu.shekhar.in@bt.com>"
+LABEL "author"="Himanshu Shekhar <himanshu.shekhar.in@gmail.com>"
 
 ADD scripts/ /usr/bin/
 
